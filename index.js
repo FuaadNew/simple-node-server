@@ -168,7 +168,6 @@ next(error)
 >>>>>>> parent of 73e5315 (fixed route bug)
 
 app.use(errorHandler)
-const PORT = process.env.PORT ||  3000
 app.listen(PORT, ()=>{
   console.log(`server running at ${PORT}`)
 })
