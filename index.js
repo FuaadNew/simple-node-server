@@ -4,7 +4,6 @@ app.use(express.json())
 const cors = require('cors')
 app.use(cors())
 app.use(express.static('dist'))
-require('dotenv').config();
 
 
 
@@ -101,7 +100,6 @@ next(error)
 
 
 app.use(errorHandler)
-const PORT = process.env.PORT ||  3000
 app.listen(PORT, ()=>{
   console.log(`server running at ${PORT}`)
 })
