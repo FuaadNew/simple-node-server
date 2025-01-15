@@ -16,9 +16,7 @@ const password = process.argv[2]
 
 const Note = require('./models/note')
 
-let notes = [
-    
-  ]
+
 
 app.get('/',(request,response)=>{
   response.send('<h1>Hello World</h1>')
@@ -33,7 +31,7 @@ app.get('/api/notes',(request,response)=>{
 
 
 
-app.post('/api/notes',(request,response)=>{
+app.post('/api/notes',(request,response,next)=>{
   
   const body = request.body
   if (!body.content){
@@ -48,15 +46,35 @@ app.post('/api/notes',(request,response)=>{
 
   note.save().then(savedNote =>{
     response.json(savedNote)
-  })
+  }).catch(error => next(error))
  
   
 })
 app.get('/api/notes/:id',(request,response)=>{
-  Note.findById(request.params.id).then(note =>{
-    response.json(note)
-  })
+  Note.findById(request.params.id)
+  .then(note =>{
+    if (note){
+      response.json(note)
+    }else{
+      response.status(404).end()
+    }
+    
+  }).catch(error=> next(error))
   
+  
+
+})
+
+app.put('/api/notes/:id', (request, response, next) => {
+  const {content,important} =  request.body
+
+  
+  Note.findByIdAndUpdate(request.params.id,note,
+    {content,important},{new:true, runValidators: true, context: 'query'})
+  .then(updatedNote =>{
+    response.json(updatedNote)
+  })
+  .catch(error =>(error))
 
 })
 
@@ -71,10 +89,18 @@ app.delete('/api/notes/:id',(request,response) => {
 
 
 
+const errorHandler = (error,request,response,next)=>{
+  console.error(error.message)
+  if (error.name === 'CastError'){
+    return response.status(400).send({error: 'malfored id'})
+  }else if (error.name === 'ValidationError'){
+    return response.status(400).json({error:error.message})
+  }
+}
+next(error)
 
 
-
-
+app.use(errorHandler)
 const PORT = process.env.PORT ||  3000
 app.listen(PORT, ()=>{
   console.log(`server running at ${PORT}`)
